@@ -5,51 +5,32 @@
 #include "constants.h"
 #include "game_state_manager.h"
 #include "components/pause_menu.h"
-#include "tetris/tetris_game.h"
+#include "tetris/tetris.h"
+sf::RenderWindow window(sf::VideoMode(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT), "Tetris");
+GameStateManager gameManager(&window);
+PauseMenu pauseMenu;
 
-void drawFrame(sf::RenderWindow& window) {
-    sf::RectangleShape frame;
-    frame.setSize(sf::Vector2f(Constants::GAME_WINDOW_WIDTH, Constants::GAME_WINDOW_HEIGHT));
-    frame.setOrigin(frame.getSize()/2.f);
-    frame.setPosition(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f);
-    frame.setFillColor(sf::Color::Transparent);
-    frame.setOutlineColor(sf::Color::White);
-    frame.setOutlineThickness(5);
-    window.draw(frame);
-}
+sf::RectangleShape overlay(sf::Vector2f(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT));
+
+// METHODS:
+void drawFrame(const sf::Sprite&);
+void manageEvent();
 
 int main() {
     std::cout << "Tetris starting..." << std::endl;
     srand(time(nullptr));
 
-    // Large backdrop window
-    sf::RenderWindow window(sf::VideoMode(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT), "Tetris");
     window.setFramerateLimit(60);
 
-    GameStateManager gameManager;  // No window parameter needed!
-    PauseMenu pauseMenu;
     pauseMenu.centerOn(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f);
 
-    // Create overlay rectangle
-    sf::RectangleShape overlay(sf::Vector2f(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT)); // Match window size
     overlay.setFillColor(sf::Color(0, 0, 0, 180)); // Black with alpha (0-255)
     overlay.setPosition(0, 0);
 
-    while (window.isOpen()) {
-        sf::Event event{};
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-            else if (event.type == sf::Event::KeyPressed)
-                gameManager.handleEvent(event);
+    gameManager.loadGame(std::make_unique<Tetris>(&window)); // TEMP
 
-            if (gameManager.paused() && event.type == sf::Event::MouseButtonPressed) {
-                int clicked = pauseMenu.handleClick(sf::Mouse::getPosition(window));
-                if (clicked == 0) gameManager.startGame();
-                else if (clicked == 1) gameManager.restartGame();
-                else if (clicked == 2) window.close();
-            }
-        }
+    while (window.isOpen()) {
+        manageEvent();
 
         gameManager.update();
         gameManager.draw();  // Draws to internal texture
@@ -59,11 +40,10 @@ int main() {
 
         // Position the game sprite (the "inner window")
         sf::Sprite& gameSprite = gameManager.getSprite();
-        gameSprite.setOrigin(Constants::GAME_WINDOW_WIDTH / 2.f, Constants::GAME_WINDOW_HEIGHT / 2.f);
         gameSprite.setPosition(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f); // Position within the large window
 
         // Optional: Add a border/frame
-        drawFrame(window);
+        // drawFrame(gameSprite);
 
         // Draw the game
         window.draw(gameSprite);
@@ -83,4 +63,33 @@ int main() {
     }
 
     return 0;
+}
+
+void manageEvent() {
+    sf::Event event{};
+    while (window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed)
+            window.close();
+        else if (gameManager.paused() && event.type == sf::Event::MouseButtonPressed) {
+            int clicked = pauseMenu.handleClick(sf::Mouse::getPosition(window));
+            if (clicked == 0) gameManager.startGame();
+            else if (clicked == 1) gameManager.restartGame();
+            else if (clicked == 2) window.close();
+        } else if (event.type == sf::Event::KeyPressed)
+            gameManager.handleEvent(event);
+
+
+    }
+}
+
+void drawFrame(const sf::Sprite& framedSprite) {
+    sf::RectangleShape frame;
+    frame.setSize(sf::Vector2f(framedSprite.getTexture()->getSize()));
+    frame.setOrigin(frame.getSize()/2.f);
+    frame.setPosition(sf::Vector2f(window.getSize())/2.f);
+    frame.setPosition(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f);
+    frame.setFillColor(sf::Color::Transparent);
+    frame.setOutlineColor(sf::Color::White);
+    frame.setOutlineThickness(3);
+    window.draw(frame);
 }

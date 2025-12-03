@@ -1,10 +1,11 @@
 #ifndef TETRIS_GAME_STATE_MANAGER_H
 #define TETRIS_GAME_STATE_MANAGER_H
-#include "tetris/tetris_game.h"
+#include "tetris/tetris.h"
 #include <memory>
 #include <SFML/Graphics.hpp>
 
 enum class GameState {
+    LOADING,
     PLAYING,
     PAUSED,
     GAME_OVER
@@ -13,25 +14,31 @@ enum class GameState {
 class GameStateManager {
 private:
     GameState state;
-    std::unique_ptr<TetrisGame> currentGame;
+    std::unique_ptr<Game> currentGame;
     sf::RenderTexture gameTexture;
     sf::Sprite gameSprite;
+    sf::RenderWindow* window;
 
 public:
-    GameStateManager() : state(GameState::PLAYING) {
-        gameTexture.create(Constants::GAME_WINDOW_WIDTH, Constants::GAME_WINDOW_HEIGHT);
-        currentGame = std::make_unique<TetrisGame>();
-    }
+    explicit GameStateManager(sf::RenderWindow* win)
+        : state(GameState::LOADING), window(win) {}
 
-    TetrisGame& getCurrentGame() { return *currentGame; }
+    Game& getCurrentGame() { return *currentGame; }
+    bool loading() { return state == GameState::LOADING; }
     bool playing() { return state == GameState::PLAYING; }
     bool paused() { return state == GameState::PAUSED; }
     bool gameOver() { return state == GameState::GAME_OVER; }
 
+    void loadGame(std::unique_ptr<Game> game) {
+        currentGame = std::move(game);
+        gameTexture.create(currentGame->textureSize().x, currentGame->textureSize().y);
+        startGame(); // TEMP
+    }
+
     void startGame() { state = GameState::PLAYING; }
 
     void restartGame() {
-        currentGame = std::make_unique<TetrisGame>();
+        currentGame = std::make_unique<Tetris>(window);
         state = GameState::PLAYING;
     }
 
@@ -46,12 +53,13 @@ public:
     void draw() {
         // Draw to the texture (internal game rendering)
         if (state == GameState::PLAYING || state == GameState::PAUSED) {
-            gameTexture.clear(sf::Color::Black);
+            gameTexture.clear(sf::Color::Transparent);
             currentGame->draw(gameTexture);  // Draw game to texture
             gameTexture.display();
 
             // Update sprite with the texture
             gameSprite.setTexture(gameTexture.getTexture());
+            gameSprite.setOrigin(currentGame->textureSize()/2.f);
         }
     }
 
@@ -66,36 +74,15 @@ public:
     }
 
     void handleEvent(sf::Event event) {
-        if (state == GameState::PAUSED) return;
-
         switch (event.key.code) {
             case sf::Keyboard::Escape:
                 pauseGame();
                 break;
-            case sf::Keyboard::Left:
-                currentGame->movePiece(-1, 0);
-                break;
-            case sf::Keyboard::Right:
-                currentGame->movePiece(1, 0);
-                break;
-            case sf::Keyboard::Down:
-                currentGame->movePiece(0, 1);
-                break;
-            case sf::Keyboard::Up:
-            case sf::Keyboard::C:
-                currentGame->rotatePiece(true);
-                break;
-            case sf::Keyboard::X:
-                currentGame->rotatePiece(false);
-                break;
-            case sf::Keyboard::Z:
-                currentGame->storePiece();
-                break;
             case sf::Keyboard::R:
                 restartGame();
                 break;
-            case sf::Keyboard::Space:
-                currentGame->pushDownPiece();
+            default:
+                currentGame->handleEvent(event);
                 break;
         }
     }

@@ -2,25 +2,33 @@
 #define TETRIS_CONSTANTS_H
 #include <vector>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics.hpp>
 
 namespace Constants {
-    constexpr int BLOCK_SIZE = 30;
-    constexpr int GRID_WIDTH = 10;
-    constexpr int GRID_HEIGHT = 20;
     constexpr int WINDOW_WIDTH = 800;
     constexpr int WINDOW_HEIGHT = 800;
-    constexpr int GAME_WINDOW_WIDTH = GRID_WIDTH * BLOCK_SIZE;
-    constexpr int GAME_WINDOW_HEIGHT = GRID_HEIGHT * BLOCK_SIZE;
+};
+
+namespace TetrisConstants {
+    constexpr int BLOCK_SIZE = 30;
+    constexpr int GRID_WIDTH_BLOCKS = 10;
+    constexpr int GRID_HEIGHT_BlOCKS = 20;
+    constexpr int DISPLAY_WIDTH_BLOCKS = 5;
+    constexpr int DISPLAY_HEIGHT_BLOCKS = 4;
+    constexpr int GRID_WIDTH = GRID_WIDTH_BLOCKS * BLOCK_SIZE;
+    constexpr int GRID_HEIGHT = GRID_HEIGHT_BlOCKS * BLOCK_SIZE;
+    constexpr int DISPLAY_WIDTH = DISPLAY_WIDTH_BLOCKS * BLOCK_SIZE;
+    constexpr int DISPLAY_HEIGHT = DISPLAY_HEIGHT_BLOCKS * BLOCK_SIZE;
 
     // Tetromino shapes (I, O, T, S, Z, J, L)
-    const std::vector<std::vector<std::vector<int>>> SHAPES = {
-        {{1,1,1,1},{0,0,0,0}}, // I
+    const std::vector<std::vector<std::vector<int>>>  SHAPES = {
+        {{0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}}, // I
         {{1,1},{1,1}}, // O
-        {{0,0,0},{1,1,1},{0,1,0}}, // T
-        {{0,0,0},{0,1,1},{1,1,0}}, // S
-        {{0,0,0},{1,1,0},{0,1,1}}, // Z
-        {{0,0,0},{1,1,1},{0,0,1}}, // J
-        {{0,0,0},{1,1,1},{1,0,0}}  // L
+        {{0,1,0},{1,1,1},{0,0,0}}, // T
+        {{0,1,1},{1,1,0},{0,0,0}}, // S
+        {{1,1,0},{0,1,1},{0,0,0}}, // Z
+        {{1,0,0},{1,1,1},{0,0,0}}, // J
+        {{0,0,1},{1,1,1},{0,0,0}}  // L
     };
 
     const std::vector<sf::Color> COLORS = {
