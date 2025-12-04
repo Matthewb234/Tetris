@@ -10,8 +10,11 @@
 
 class PieceDisplay {
 private:
+    sf::Sprite pieceSprite;
+
     sf::RenderTexture displayTexture;
     sf::Sprite displaySprite;
+
     sf::Font font;
     sf::Text label;
     sf::Vector2f position;
@@ -36,7 +39,7 @@ public:
         label.setString(labelText);
         label.setCharacterSize(16);
         label.setFillColor(sf::Color::Black);
-        label.setPosition(10, displayTexture.getSize().y - 25);  // Top-left when flipped
+        label.setPosition(10, displayTexture.getSize().y * .04);  // Top-left when flipped
 
         setTetrimino(nullptr);
     }
@@ -49,8 +52,7 @@ public:
         // Draw white top quarter (for label)
         sf::RectangleShape topSection(sf::Vector2f(
             displayTexture.getSize().x,
-            displayTexture.getSize().y - quarterHeight));
-        topSection.setPosition(0, quarterHeight);
+            quarterHeight));
         topSection.setFillColor(sf::Color::White);
         displayTexture.draw(topSection);
 
@@ -61,10 +63,13 @@ public:
         if (tetromino != nullptr) {
             tetromino->zero();
             // Center the piece below the label
-            tetromino->pieceSprite.setPosition(sf::Vector2f(
-                TetrisConstants::DISPLAY_WIDTH/2 - TetrisConstants::BLOCK_SIZE * 2,
-                TetrisConstants::DISPLAY_HEIGHT/2));
-            displayTexture.draw(tetromino->pieceSprite);
+            pieceSprite = tetromino->pieceSprite;
+            int origin = (tetromino->shape[0].size() / 2.f) * TetrisConstants::BLOCK_SIZE;
+            pieceSprite.setOrigin(origin, origin);
+            pieceSprite.setPosition(sf::Vector2f(
+                TetrisConstants::DISPLAY_WIDTH/2,
+                TetrisConstants::DISPLAY_HEIGHT * (5/8.f)));
+            displayTexture.draw(pieceSprite);
         }
 
         // Draw border frame

@@ -74,13 +74,13 @@ void Tetromino::rotate(bool rotateRight) {
 void Tetromino::zero() {
     shape = baseShape;
     coords.x = TetrisConstants::GRID_WIDTH_BLOCKS / 2;
-    coords.y = shape == TetrisConstants::SHAPES[0] ? -1 : -2;
+    coords.y = shape == TetrisConstants::SHAPES[0] ? 0 : -1;
 
     createSprite();
 }
 
 void Tetromino::calcGhostPosition(const std::vector<std::vector<sf::Color>>& grid) {
-    coords.ghostY = 0;
+    coords.ghostY = coords.y;
     while (isValidMove(0, coords.ghostY - coords.y + 1, grid)) {
         coords.ghostY++;
     }

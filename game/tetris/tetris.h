@@ -25,6 +25,7 @@ private:
     std::uniform_int_distribution<> numGen = std::uniform_int_distribution<>(0, 6);
     std::unique_ptr<Tetromino> currentPiece;
     std::unique_ptr<Tetromino> storedPiece;
+    std::unique_ptr<Tetromino> nextPiece;
 
     std::unique_ptr<PieceDisplay> storedPieceDisplay;
     std::unique_ptr<PieceDisplay> nextPieceDisplay;

@@ -9,6 +9,7 @@ Tetris::Tetris(sf::RenderWindow* win)
     : window(win), dropTimer(DropTimer(1)) {
     grid.resize(TetrisConstants::GRID_HEIGHT_BlOCKS, std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
     initializeBoard();
+    nextPiece = std::make_unique<Tetromino>(numGen(generator));
     spawnPiece();
 }
 
@@ -28,15 +29,24 @@ void Tetris::initializeBoard() {
     gridSprite.setOrigin(TetrisConstants::GRID_WIDTH/2.f, TetrisConstants::GRID_HEIGHT/2.f);
     gridSprite.setPosition(board->getSize()/2.f);
 
-    storedPieceDisplay = std::make_unique<PieceDisplay>(0, 0, sf::Vector2f(0,0), "HOLD");
+    storedPieceDisplay = std::make_unique<PieceDisplay>(
+        gridSprite.getPosition().x - (gridTexture.getSize().x/2),
+        gridSprite.getPosition().y - (gridTexture.getSize().y/2 + 3),
+        sf::Vector2f(TetrisConstants::DISPLAY_WIDTH,0), "HOLD");
+    nextPieceDisplay = std::make_unique<PieceDisplay>(
+    gridSprite.getPosition().x + (gridTexture.getSize().x/2),
+    gridSprite.getPosition().y - (gridTexture.getSize().y/2 + 3),
+    sf::Vector2f(0, 0), "NEXT");
 }
 
 void Tetris::spawnPiece() {
     int num = numGen(generator);
-    currentPiece = std::make_unique<Tetromino>(num);
+    currentPiece = std::move(nextPiece);
+    nextPiece = std::make_unique<Tetromino>(num);
     if (!currentPiece->isValidMove(0, 0, grid)) {
         invalidSpawn = true;
     }
+    nextPieceDisplay->setTetrimino(nextPiece.get());
 }
 
 void Tetris::movePiece(int dx, int dy) {
@@ -138,11 +148,19 @@ void Tetris::drawGrid() {
         gridTexture.display();
         gridNeedsUpdate = false;
     }
-
     board->drawToBoard(gridSprite);
+
+    sf::RectangleShape frame(static_cast<sf::Vector2f>(gridTexture.getSize()));
+    frame.setFillColor(sf::Color::Transparent);
+    frame.setOutlineColor(sf::Color::White);
+    frame.setOutlineThickness(3);
+    frame.setOrigin(gridSprite.getOrigin());
+    frame.setPosition(gridSprite.getPosition());
+    board->drawToBoard(frame);
 }
 
 void Tetris::drawCurrentPiece() {
+    if (currentPiece->coords.y < 1) return; //TODO Fix this to show partial shapes
     sf::Vector2f baseCoords = gridSprite.getPosition() - gridSprite.getOrigin();
     currentPiece->ghostSprite.setPosition(currentPiece->position(true) + baseCoords);
     currentPiece->pieceSprite.setPosition(currentPiece->position(false) + baseCoords);
@@ -185,6 +203,7 @@ void Tetris::drawGameContent() {
     drawGrid();
     drawCurrentPiece();
     board->drawToBoard(storedPieceDisplay->getSprite());
+    board->drawToBoard(nextPieceDisplay->getSprite());
 }
 
 bool Tetris::update() {
