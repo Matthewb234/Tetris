@@ -3,13 +3,16 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include "tetromino.h"
-#include "../constants.h"
+#include "../../constants.h"
 
-Tetris::Tetris(sf::RenderWindow* win)
-    : window(win), dropTimer(DropTimer(1)) {
+Tetris::Tetris()
+    : dropTimer(DropTimer(1)) {
     grid.resize(TetrisConstants::GRID_HEIGHT_BlOCKS, std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
     initializeBoard();
-    nextPiece = std::make_unique<Tetromino>(numGen(generator));
+
+    std::shuffle(pieceBag.begin(), pieceBag.end(), generator);
+    nextPiece = std::make_unique<Tetromino>(pieceBag.back());
+    pieceBag.pop_back();
     spawnPiece();
 }
 
@@ -40,13 +43,18 @@ void Tetris::initializeBoard() {
 }
 
 void Tetris::spawnPiece() {
-    int num = numGen(generator);
+    if (pieceBag.empty()) {
+        pieceBag = {0, 1, 2, 3, 4, 5, 6};
+        std::shuffle(pieceBag.begin(), pieceBag.end(), generator);
+    }
+    int num = pieceBag.back();
+    pieceBag.pop_back();
     currentPiece = std::move(nextPiece);
     nextPiece = std::make_unique<Tetromino>(num);
     if (!currentPiece->isValidMove(0, 0, grid)) {
         invalidSpawn = true;
     }
-    nextPieceDisplay->setTetrimino(nextPiece.get());
+    nextPieceDisplay->setTetromino(nextPiece.get());
 }
 
 void Tetris::movePiece(int dx, int dy) {
@@ -85,7 +93,6 @@ void Tetris::lockPiece() {
             }
         }
     }
-    markGridDirty();
     clearLines();
     spawnPiece();
 }
@@ -98,7 +105,7 @@ void Tetris::storePiece() {
         std::swap(currentPiece, storedPiece);
         currentPiece->zero();
     }
-    storedPieceDisplay->setTetrimino(storedPiece.get());
+    storedPieceDisplay->setTetromino(storedPiece.get());
 }
 
 void Tetris::pushDownPiece() {
@@ -120,34 +127,31 @@ void Tetris::clearLines() {
             grid.erase(grid.begin() + i);
             grid.insert(grid.begin(), std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
             i++; // Check the same line again
-            markGridDirty();
         }
     }
 }
 
 void Tetris::drawGrid() {
-    if (gridNeedsUpdate) {
-        gridTexture.clear(sf::Color::Transparent);
+    gridTexture.clear(sf::Color::Transparent);
 
-        for (int i = 0; i < TetrisConstants::GRID_HEIGHT_BlOCKS; i++) {
-            for (int j = 0; j < TetrisConstants::GRID_WIDTH_BLOCKS; j++) {
-                sf::RectangleShape block(sf::Vector2f(
-                    TetrisConstants::BLOCK_SIZE - 1,
-                    TetrisConstants::BLOCK_SIZE - 1
-                ));
-                block.setPosition(
-                    j * TetrisConstants::BLOCK_SIZE,
-                    i * TetrisConstants::BLOCK_SIZE
-                );
-                block.setFillColor(grid[i][j]);
+    for (int i = 0; i < TetrisConstants::GRID_HEIGHT_BlOCKS; i++) {
+        for (int j = 0; j < TetrisConstants::GRID_WIDTH_BLOCKS; j++) {
+            sf::RectangleShape block(sf::Vector2f(
+                TetrisConstants::BLOCK_SIZE - 1,
+                TetrisConstants::BLOCK_SIZE - 1
+            ));
+            block.setPosition(
+                j * TetrisConstants::BLOCK_SIZE,
+                i * TetrisConstants::BLOCK_SIZE
+            );
+            block.setFillColor(grid[i][j]);
 
-                gridTexture.draw(block);
-            }
+            gridTexture.draw(block);
         }
-
-        gridTexture.display();
-        gridNeedsUpdate = false;
     }
+
+    drawCurrentPiece();
+    gridTexture.display();
     board->drawToBoard(gridSprite);
 
     sf::RectangleShape frame(static_cast<sf::Vector2f>(gridTexture.getSize()));
@@ -160,16 +164,10 @@ void Tetris::drawGrid() {
 }
 
 void Tetris::drawCurrentPiece() {
-    if (currentPiece->coords.y < 1) return; //TODO Fix this to show partial shapes
-    sf::Vector2f baseCoords = gridSprite.getPosition() - gridSprite.getOrigin();
-    currentPiece->ghostSprite.setPosition(currentPiece->position(true) + baseCoords);
-    currentPiece->pieceSprite.setPosition(currentPiece->position(false) + baseCoords);
-    board->drawToBoard(currentPiece->pieceSprite);
-    board->drawToBoard(currentPiece->ghostSprite);
-}
-
-void Tetris::markGridDirty() {
-    gridNeedsUpdate = true;
+    currentPiece->ghostSprite.setPosition(currentPiece->position(true));
+    currentPiece->pieceSprite.setPosition(currentPiece->position(false));
+    gridTexture.draw(currentPiece->ghostSprite);
+    gridTexture.draw(currentPiece->pieceSprite);
 }
 
 void Tetris::handleEvent(sf::Event event) {
@@ -201,7 +199,6 @@ void Tetris::handleEvent(sf::Event event) {
 
 void Tetris::drawGameContent() {
     drawGrid();
-    drawCurrentPiece();
     board->drawToBoard(storedPieceDisplay->getSprite());
     board->drawToBoard(nextPieceDisplay->getSprite());
 }

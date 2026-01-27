@@ -5,10 +5,11 @@
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
-#include "../constants.h"
+#include "../../constants.h"
 
 struct Coords {
     int x, y, ghostY;
+
 
     Coords() : x(0), y(0) {}
     Coords(int x, int y) : x(x), y(y) {}
@@ -22,6 +23,7 @@ struct Coords {
 class Tetromino {
 private:
     sf::RenderTexture pieceTexture;
+    sf::RenderTexture ghostTexture;
     sf::Texture blockTexture;
 
 public:

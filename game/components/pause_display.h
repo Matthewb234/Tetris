@@ -5,10 +5,10 @@
 #include <vector>
 #include <string>
 
-class PauseMenu {
+class PauseDisplay {
 private:
-    sf::RenderTexture menuTexture;
-    sf::Sprite menuSprite;
+    sf::RenderTexture displayTexture;
+    sf::Sprite displaySprite;
     std::vector<sf::RectangleShape> buttons;
     std::vector<sf::Text> buttonTexts;
     sf::Font font;
@@ -19,9 +19,9 @@ private:
     const float MENU_HEIGHT = 400;
 
 public:
-    PauseMenu() : hoveredButton(-1) {
+    PauseDisplay() : hoveredButton(-1) {
         // Create the render texture
-        menuTexture.create(MENU_WIDTH, MENU_HEIGHT);
+        displayTexture.create(MENU_WIDTH, MENU_HEIGHT);
 
         // Load font (adjust path as needed)
         if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
@@ -60,7 +60,7 @@ public:
 
     void update(sf::Vector2i mousePos) {
         // Use inverse transform to convert window coords to menu coords
-        sf::Transform inverse = menuSprite.getInverseTransform();
+        sf::Transform inverse = displaySprite.getInverseTransform();
         sf::Vector2f localMousePos = inverse.transformPoint(static_cast<sf::Vector2f>(mousePos));
 
         hoveredButton = -1;
@@ -76,7 +76,7 @@ public:
 
     int handleClick(sf::Vector2i mousePos) {
         // Use inverse transform to convert window coords to menu coords
-        sf::Transform inverse = menuSprite.getInverseTransform();
+        sf::Transform inverse = displaySprite.getInverseTransform();
         sf::Vector2f localMousePos = inverse.transformPoint(static_cast<sf::Vector2f>(mousePos));
 
         for (size_t i = 0; i < buttons.size(); i++) {
@@ -89,7 +89,7 @@ public:
 
     void draw() {
         // Draw to the texture
-        menuTexture.clear(sf::Color(20, 20, 30, 230)); // Semi-transparent background
+        displayTexture.clear(sf::Color(20, 20, 30, 230)); // Semi-transparent background
 
         // Draw title
         sf::Text title;
@@ -99,27 +99,27 @@ public:
         title.setFillColor(sf::Color::White);
         sf::FloatRect titleBounds = title.getLocalBounds();
         title.setPosition(MENU_WIDTH / 2 - titleBounds.width / 2, 20);
-        menuTexture.draw(title);
+        displayTexture.draw(title);
 
         // Draw buttons
         for (size_t i = 0; i < buttons.size(); i++) {
-            menuTexture.draw(buttons[i]);
-            menuTexture.draw(buttonTexts[i]);
+            displayTexture.draw(buttons[i]);
+            displayTexture.draw(buttonTexts[i]);
         }
 
-        menuTexture.display();
+        displayTexture.display();
 
         // Update sprite with texture
-        menuSprite.setTexture(menuTexture.getTexture());
+        displaySprite.setTexture(displayTexture.getTexture());
     }
 
     sf::Sprite& getSprite() {
-        return menuSprite;
+        return displaySprite;
     }
 
     void centerOn(float x, float y) {
-        menuSprite.setOrigin(MENU_WIDTH / 2, MENU_HEIGHT / 2);
-        menuSprite.setPosition(x, y);
+        displaySprite.setOrigin(MENU_WIDTH / 2, MENU_HEIGHT / 2);
+        displaySprite.setPosition(x, y);
     }
 };
 

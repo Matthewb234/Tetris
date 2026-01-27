@@ -4,12 +4,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-#include "../constants.h"
+#include "../../constants.h"
 
 class GameBoard {
 private:
     sf::RenderTexture renderTexture;
-    sf::Sprite boardSprite;
     sf::Vector2f boardPosition;
     sf::Vector2f boardSize;
 
@@ -24,7 +23,6 @@ public:
     // Get position and size info
     sf::Vector2f getPosition() const { return boardPosition; }
     sf::Vector2f getSize() const { return boardSize; }
-    sf::FloatRect getBounds() const { return boardSprite.getGlobalBounds(); }
 
     // Clear the board for new frame
     void clear(const sf::Color& color = sf::Color::Transparent);
@@ -34,9 +32,6 @@ public:
 
     // Finalize the board (call after all drawToBoard calls)
     void display();
-
-    // Draw the entire board to the window
-    void draw(sf::RenderWindow& window);
 
     // Get the render texture for more advanced usage
     sf::RenderTexture& getRenderTexture() { return renderTexture; }

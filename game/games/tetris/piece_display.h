@@ -5,8 +5,9 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Font.hpp>
 
-#include "../constants.h"
+#include "../../constants.h"
 #include "tetromino.h"
+#include "iostream"
 
 class PieceDisplay {
 private:
@@ -25,10 +26,10 @@ public:
     PieceDisplay(float x, float y, sf::Vector2f origin, const std::string& labelText)
         : position(x, y) {
         displayTexture.create(TetrisConstants::DISPLAY_WIDTH, TetrisConstants::DISPLAY_HEIGHT);
+        displayTexture.display();
 
         displaySprite.setTexture(displayTexture.getTexture());
-        displaySprite.setScale(1.f, -1.f);
-        displaySprite.setOrigin(origin.x, origin.y + displayTexture.getSize().y);
+        displaySprite.setOrigin(origin.x, origin.y);
         displaySprite.setPosition(position);
 
         if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
@@ -41,10 +42,10 @@ public:
         label.setFillColor(sf::Color::Black);
         label.setPosition(10, displayTexture.getSize().y * .04);  // Top-left when flipped
 
-        setTetrimino(nullptr);
+        setTetromino(nullptr);
     }
 
-    void setTetrimino(Tetromino* tetromino) {
+    void setTetromino(Tetromino* tetromino) {
         displayTexture.clear(sf::Color::Transparent);
 
         float quarterHeight = displayTexture.getSize().y / 4.f;
@@ -64,8 +65,12 @@ public:
             tetromino->zero();
             // Center the piece below the label
             pieceSprite = tetromino->pieceSprite;
-            int origin = (tetromino->shape[0].size() / 2.f) * TetrisConstants::BLOCK_SIZE;
-            pieceSprite.setOrigin(origin, origin);
+            int center = (tetromino->shape[0].size() / 2.f) * TetrisConstants::BLOCK_SIZE;
+            sf::Vector2f origin(center, center);
+            if (tetromino->shape[0].size() != 2) {
+                origin.y -= 15;
+            }
+            pieceSprite.setOrigin(origin);
             pieceSprite.setPosition(sf::Vector2f(
                 TetrisConstants::DISPLAY_WIDTH/2,
                 TetrisConstants::DISPLAY_HEIGHT * (5/8.f)));

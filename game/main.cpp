@@ -4,11 +4,13 @@
 
 #include "constants.h"
 #include "game_state_manager.h"
-#include "components/pause_menu.h"
-#include "tetris/tetris.h"
+#include "page_state_manager.h"
+#include "components/pause_display.h"
+#include "games/tetris/tetris.h"
 sf::RenderWindow window(sf::VideoMode(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT), "Tetris");
 GameStateManager gameManager(&window);
-PauseMenu pauseMenu;
+PageStateManager pageManager(&window);
+PauseDisplay pauseDisplay;
 
 sf::RectangleShape overlay(sf::Vector2f(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT));
 
@@ -22,43 +24,46 @@ int main() {
 
     window.setFramerateLimit(60);
 
-    pauseMenu.centerOn(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f);
+    pauseDisplay.centerOn(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f);
 
     overlay.setFillColor(sf::Color(0, 0, 0, 180)); // Black with alpha (0-255)
     overlay.setPosition(0, 0);
 
-    gameManager.loadGame(std::make_unique<Tetris>(&window)); // TEMP
-
     while (window.isOpen()) {
         manageEvent();
+        sf::Sprite windowSprite;
 
-        gameManager.update();
-        gameManager.draw();  // Draws to internal texture
+        if (!pageManager.inGame()) {
+            pageManager.update(sf::Mouse::getPosition(window));
+            pageManager.draw();
+            windowSprite = pageManager.getSprite();
+        } else {
+            gameManager.update();
+            gameManager.draw();  // Draws to internal texture
+            windowSprite = gameManager.getSprite();
+        }
+
 
         // === Main Window Drawing ===
         window.clear(sf::Color(30, 30, 40)); // Dark backdrop
 
         // Position the game sprite (the "inner window")
-        sf::Sprite& gameSprite = gameManager.getSprite();
-        gameSprite.setPosition(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f); // Position within the large window
+        windowSprite.setPosition(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f); // Position within the large window
 
         // Optional: Add a border/frame
-        // drawFrame(gameSprite);
+        // drawFrame(windowSprite);
 
         // Draw the game
-        window.draw(gameSprite);
+        window.draw(windowSprite);
 
         // Draw pause menu on top if needed
-        if (gameManager.paused()) {
+        if (gameManager.paused() && pageManager.inGame()) {
             window.draw(overlay);
 
-            pauseMenu.update(sf::Mouse::getPosition(window));
-            pauseMenu.draw();  // Renders to its own texture
-            window.draw(pauseMenu.getSprite());  // Draw the menu sprite
+            pauseDisplay.update(sf::Mouse::getPosition(window));
+            pauseDisplay.draw(); // Renders to its own texture
+            window.draw(pauseDisplay.getSprite()); // Draw the menu sprite
         }
-
-        // Add other UI elements here (score, next piece, etc.)
-
         window.display();
     }
 
@@ -68,17 +73,29 @@ int main() {
 void manageEvent() {
     sf::Event event{};
     while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
+        if (event.type == sf::Event::Closed){
             window.close();
-        else if (gameManager.paused() && event.type == sf::Event::MouseButtonPressed) {
-            int clicked = pauseMenu.handleClick(sf::Mouse::getPosition(window));
-            if (clicked == 0) gameManager.startGame();
-            else if (clicked == 1) gameManager.restartGame();
+        } else if (pageManager.inGame()) {
+            if (gameManager.paused() && event.type == sf::Event::MouseButtonPressed) {
+                int clicked = pauseDisplay.handleClick(sf::Mouse::getPosition(window));
+                if (clicked == 0) gameManager.startGame();
+                else if (clicked == 1) gameManager.restartGame();
+                else if (clicked == 2) {
+                    gameManager.pauseGame();
+                    pageManager.switchState(PageState::MAIN_MENU);
+                }
+            } else if (event.type == sf::Event::KeyPressed) {
+                gameManager.handleEvent(event);
+            }
+        } else if (event.type == sf::Event::MouseButtonPressed) {
+            int clicked = pageManager.handleClick(sf::Mouse::getPosition(window));
+            if (clicked == 0) {
+                pageManager.switchState(PageState::GAME);
+                gameManager.loadGame(std::make_unique<Tetris>());
+            }
+            else if (clicked == 1);
             else if (clicked == 2) window.close();
-        } else if (event.type == sf::Event::KeyPressed)
-            gameManager.handleEvent(event);
-
-
+        }
     }
 }
 

@@ -1,5 +1,9 @@
 #ifndef TETRIS_BUTTON_H
 #define TETRIS_BUTTON_H
+
+#include <iostream>
+#include <SFML/Graphics.hpp>
+
 class Button {
 private:
     sf::RectangleShape shape;
@@ -33,20 +37,20 @@ public:
 
     void update(sf::Vector2i mousePos) {
         isHovered = shape.getGlobalBounds().contains(mousePos.x, mousePos.y);
-        if (isHovered) {
-            shape.setFillColor(sf::Color(100, 100, 100));
-        } else {
-            shape.setFillColor(sf::Color(70, 70, 70));
-        }
     }
 
     bool isClicked(sf::Vector2i mousePos) {
         return isHovered && shape.getGlobalBounds().contains(mousePos.x, mousePos.y);
     }
 
-    void draw(sf::RenderWindow& window) {
-        window.draw(shape);
-        window.draw(text);
+    void draw(sf::RenderTexture& texture) {
+        if (isHovered) {
+            shape.setFillColor(sf::Color(100, 100, 100));
+        } else {
+            shape.setFillColor(sf::Color(70, 70, 70));
+        }
+        texture.draw(shape);
+        texture.draw(text);
     }
 };
 #endif //TETRIS_BUTTON_H

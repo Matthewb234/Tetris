@@ -4,6 +4,8 @@
 #pragma once
 #include <iostream>
 
+#include "gameboard/gameboard.h"
+
 class Game {
 protected:
     std::unique_ptr<GameBoard> board;

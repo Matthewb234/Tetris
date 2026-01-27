@@ -3,7 +3,7 @@
 #include <iostream>
 #include <SFML/Graphics/RectangleShape.hpp>
 
-#include "../constants.h"
+#include "../../constants.h"
 
 
 Tetromino::Tetromino(int shapeIndex) {
@@ -18,7 +18,7 @@ Tetromino::Tetromino(int shapeIndex) {
 
 void Tetromino::createBlockTexture() {
     sf::Image blockImage;
-    blockImage.create(TetrisConstants::BLOCK_SIZE - 2, TetrisConstants::BLOCK_SIZE - 2, sf::Color::White);
+    blockImage.create(TetrisConstants::BLOCK_SIZE - 1, TetrisConstants::BLOCK_SIZE - 1, sf::Color::White);
     blockTexture.loadFromImage(blockImage);
 }
 
@@ -34,16 +34,16 @@ void Tetromino::createSprite() {
             if (!shape[i][j]) continue;
             sf::RectangleShape block(sf::Vector2f(TetrisConstants::BLOCK_SIZE - 1, TetrisConstants::BLOCK_SIZE - 1));
             block.setTexture(&blockTexture);
-            block.setPosition(j * TetrisConstants::BLOCK_SIZE, (rows - 1 - i) * TetrisConstants::BLOCK_SIZE);
+            block.setPosition(j * TetrisConstants::BLOCK_SIZE, i * TetrisConstants::BLOCK_SIZE);
             block.setFillColor(color);
             pieceTexture.draw(block);
         }
     }
+    pieceTexture.display();
 
     pieceSprite.setTexture(pieceTexture.getTexture());
     int origin = (shape[0].size() / 2) * TetrisConstants::BLOCK_SIZE;
     pieceSprite.setOrigin(origin, origin);
-
     ghostSprite = pieceSprite;
     ghostSprite.setColor(sf::Color(255, 255, 255, 100));
 }

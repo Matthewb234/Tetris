@@ -9,13 +9,11 @@
 #include "drop_timer.h"
 #include "piece_display.h"
 #include "tetromino.h"
-#include "../components/gameboard.h"
-#include "../components/game.h"
+#include "../../components/gameboard/gameboard.h"
+#include "../../components/game.h"
 
 class Tetris : public Game {
 private:
-    sf::RenderWindow* window;
-
     std::vector<std::vector<sf::Color>> grid;
     sf::RenderTexture gridTexture;
     sf::Sprite gridSprite;
@@ -23,6 +21,8 @@ private:
     std::random_device rd;
     std::mt19937 generator = std::mt19937(rd());
     std::uniform_int_distribution<> numGen = std::uniform_int_distribution<>(0, 6);
+
+    std::vector<int> pieceBag = {0, 1, 2, 3, 4, 5, 6};
     std::unique_ptr<Tetromino> currentPiece;
     std::unique_ptr<Tetromino> storedPiece;
     std::unique_ptr<Tetromino> nextPiece;
@@ -33,16 +33,14 @@ private:
     DropTimer dropTimer;
 
     bool invalidSpawn = false;
-    bool gridNeedsUpdate = true;
 
     // Helper methods for rendering with GameBoard
     void drawGrid();
     void drawCurrentPiece();
-    void markGridDirty();
     void drawGameContent() override;
 
 public:
-    explicit Tetris(sf::RenderWindow* win);
+    explicit Tetris();
     void initializeBoard();
     void spawnPiece();
     void movePiece(int, int);

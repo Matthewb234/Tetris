@@ -1,8 +1,10 @@
 #ifndef TETRIS_GAME_STATE_MANAGER_H
 #define TETRIS_GAME_STATE_MANAGER_H
-#include "tetris/tetris.h"
 #include <memory>
 #include <SFML/Graphics.hpp>
+
+#include "components/game.h"
+#include "games/tetris/tetris.h"
 
 enum class GameState {
     LOADING,
@@ -38,7 +40,7 @@ public:
     void startGame() { state = GameState::PLAYING; }
 
     void restartGame() {
-        currentGame = std::make_unique<Tetris>(window);
+        currentGame = std::make_unique<Tetris>();
         state = GameState::PLAYING;
     }
 
@@ -72,6 +74,8 @@ public:
             state = GameState::PAUSED;
         }
     }
+
+
 
     void handleEvent(sf::Event event) {
         switch (event.key.code) {
