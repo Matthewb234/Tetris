@@ -3,10 +3,11 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include "tetromino.h"
+#include "../../application_context.h"
 #include "../../constants.h"
 
 Tetris::Tetris()
-    : dropTimer(DropTimer(1)) {
+: dropTimer(DropTimer(1)) {
     grid.resize(TetrisConstants::GRID_HEIGHT_BlOCKS, std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
     initializeBoard();
 
@@ -55,6 +56,7 @@ void Tetris::spawnPiece() {
         invalidSpawn = true;
     }
     nextPieceDisplay->setTetromino(nextPiece.get());
+    canStorePiece = true;
 }
 
 void Tetris::movePiece(int dx, int dy) {
@@ -98,6 +100,7 @@ void Tetris::lockPiece() {
 }
 
 void Tetris::storePiece() {
+    if (!canStorePiece) return;
     if (storedPiece == nullptr) {
         storedPiece = std::move(currentPiece);
         spawnPiece();
@@ -106,6 +109,7 @@ void Tetris::storePiece() {
         currentPiece->zero();
     }
     storedPieceDisplay->setTetromino(storedPiece.get());
+    canStorePiece = false;
 }
 
 void Tetris::pushDownPiece() {
@@ -171,29 +175,22 @@ void Tetris::drawCurrentPiece() {
 }
 
 void Tetris::handleEvent(sf::Event event) {
-    switch (event.key.code) {
-        case sf::Keyboard::Left:
-            movePiece(-1, 0);
-            break;
-        case sf::Keyboard::Right:
-            movePiece(1, 0);
-            break;
-        case sf::Keyboard::Down:
-            movePiece(0, 1);
-            break;
-        case sf::Keyboard::Up:
-        case sf::Keyboard::C:
-            rotatePiece(true);
-            break;
-        case sf::Keyboard::X:
-            rotatePiece(false);
-            break;
-        case sf::Keyboard::Z:
-            storePiece();
-            break;
-        case sf::Keyboard::Space:
-            pushDownPiece();
-            break;
+    auto& input = ApplicationContext::get().getInputManager();
+
+    if (input.isPressed("Move Left", event.key.code)) {
+        movePiece(-1, 0);
+    } else if (input.isPressed("Move Right", event.key.code)) {
+        movePiece(1, 0);
+    } else if (input.isPressed("Move Down", event.key.code)) {
+        movePiece(0, 1);
+    } else if (input.isPressed("Rotate CW", event.key.code)) {
+        rotatePiece(true);
+    } else if (input.isPressed("Rotate CCW", event.key.code)) {
+        rotatePiece(false);
+    } else if (input.isPressed("Store", event.key.code)) {
+        storePiece();
+    } else if (input.isPressed("Push Down", event.key.code)) {
+        pushDownPiece();
     }
 }
 
@@ -217,3 +214,8 @@ bool Tetris::update() {
 
     return true;
 }
+
+void Tetris::activateInputContext() {
+    auto& input = ApplicationContext::get().getInputManager();
+    input.setActiveContext("tetris");
+};

@@ -4,12 +4,10 @@
 #pragma once
 #include <memory>
 #include <random>
-#include <SFML/Graphics/RenderWindow.hpp>
 
 #include "drop_timer.h"
 #include "piece_display.h"
 #include "tetromino.h"
-#include "../../components/gameboard/gameboard.h"
 #include "../../components/game.h"
 
 class Tetris : public Game {
@@ -33,6 +31,7 @@ private:
     DropTimer dropTimer;
 
     bool invalidSpawn = false;
+    bool canStorePiece = true;
 
     // Helper methods for rendering with GameBoard
     void drawGrid();
@@ -51,5 +50,6 @@ public:
     void clearLines();
     void handleEvent(sf::Event event) override;
     bool update() override;
+    void activateInputContext() override;
 };
 #endif // TETRIS_GAME_H

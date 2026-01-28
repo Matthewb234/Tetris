@@ -7,6 +7,8 @@
 namespace Constants {
     constexpr int WINDOW_WIDTH = 800;
     constexpr int WINDOW_HEIGHT = 800;
+    constexpr int PAUSE_DISPLAY_WIDTH = 250;
+    constexpr int PAUSE_DISPLAY_HEIGHT = 350;
 };
 
 namespace TetrisConstants {

@@ -15,6 +15,7 @@ public:
 
     virtual void handleEvent(sf::Event event) = 0;
     virtual bool update() = 0;
+    virtual void activateInputContext() = 0;
     virtual sf::Vector2f textureSize() {return board->getSize();}
     virtual void draw(sf::RenderTarget& target) {
         board->clear(sf::Color(20, 20, 30));

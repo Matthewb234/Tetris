@@ -7,8 +7,9 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 
-#include "components/menu_page.h"
-#include "pages/ main menu/main_menu.h"
+#include "../components/menu_page.h"
+#include "../pages/mainMenu/main_menu.h"
+#include "../pages/settings/settings.h"
 
 enum class PageState {
     MAIN_MENU,
@@ -22,10 +23,9 @@ private:
     std::unique_ptr<MenuPage> currentPage;
     sf::RenderTexture pageTexture;
     sf::Sprite pageSprite;
-    sf::RenderWindow* window;
 
 public:
-    explicit PageStateManager(sf::RenderWindow* win) : window(win) {
+    explicit PageStateManager() {
         switchState(PageState::MAIN_MENU);
     }
 
@@ -35,12 +35,13 @@ public:
     bool inGame() { return state == PageState::GAME; }
 
     void switchState(PageState newState) {
+        state = newState;
         switch (newState) {
             case PageState::MAIN_MENU:
                 currentPage = std::make_unique<MainMenu>();
                 break;
             case PageState::SETTINGS:
-                // currentPage = std::make_unique<>();
+                currentPage = std::make_unique<Settings>();
                 break;
             case PageState::GAME:
                 currentPage = nullptr;
@@ -71,8 +72,8 @@ public:
         return pageSprite;
     }
 
-    int handleClick(sf::Vector2i mousePos) {
-        return currentPage ? currentPage->handleClick(mousePos) : -1;
+    void handleClick(sf::Vector2i mousePos) {
+        currentPage->handleClick(mousePos);
     }
 };
 #endif //TETRIS_PAGE_STATE_MANAGER_H

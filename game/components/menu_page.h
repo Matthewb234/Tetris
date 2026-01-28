@@ -18,8 +18,9 @@ public:
     MenuPage() {
         renderTexture.create(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT);
     }
+
     virtual ~MenuPage() = default;
-    virtual int handleClick(sf::Vector2i mousePos) = 0;
+    virtual void handleClick(sf::Vector2i mousePos) = 0;
     virtual void update(sf::Vector2i mousePos) = 0;
     virtual sf::Vector2f textureSize() {return sf::Vector2f(renderTexture.getSize());}
     virtual void draw(sf::RenderTarget& target) {

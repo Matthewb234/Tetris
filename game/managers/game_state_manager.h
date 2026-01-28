@@ -3,8 +3,8 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 
-#include "components/game.h"
-#include "games/tetris/tetris.h"
+#include "../components/game.h"
+#include "../games/tetris/tetris.h"
 
 enum class GameState {
     LOADING,
@@ -19,22 +19,27 @@ private:
     std::unique_ptr<Game> currentGame;
     sf::RenderTexture gameTexture;
     sf::Sprite gameSprite;
-    sf::RenderWindow* window;
 
 public:
-    explicit GameStateManager(sf::RenderWindow* win)
-        : state(GameState::LOADING), window(win) {}
+    explicit GameStateManager() : state(GameState::LOADING) {}
 
     Game& getCurrentGame() { return *currentGame; }
+    bool hasGameLoaded() {return currentGame != nullptr;}
     bool loading() { return state == GameState::LOADING; }
     bool playing() { return state == GameState::PLAYING; }
     bool paused() { return state == GameState::PAUSED; }
     bool gameOver() { return state == GameState::GAME_OVER; }
 
+    void buildDefaultGame() {
+        currentGame = std::make_unique<Tetris>();
+        gameTexture.create(currentGame->textureSize().x, currentGame->textureSize().y);
+        currentGame->activateInputContext();
+    }
+
     void loadGame(std::unique_ptr<Game> game) {
         currentGame = std::move(game);
         gameTexture.create(currentGame->textureSize().x, currentGame->textureSize().y);
-        startGame(); // TEMP
+        currentGame->activateInputContext();
     }
 
     void startGame() { state = GameState::PLAYING; }
