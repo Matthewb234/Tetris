@@ -15,7 +15,6 @@ Tetromino::Tetromino(int shapeIndex) {
     createSprite();
 }
 
-
 void Tetromino::createBlockTexture() {
     sf::Image blockImage;
     blockImage.create(TetrisConstants::BLOCK_SIZE - 1, TetrisConstants::BLOCK_SIZE - 1, sf::Color::White);
@@ -67,8 +66,27 @@ void Tetromino::rotate(bool rotateRight) {
         }
     }
     shape = rotated;
-
+    if (rotateRight) {
+        currentRotation = static_cast<RotationState>((static_cast<int>(currentRotation) + 1) % 4);
+    } else {
+        currentRotation = static_cast<RotationState>((static_cast<int>(currentRotation) + 3) % 4);
+    }
     createSprite();
+}
+
+std::vector<sf::Vector2i> Tetromino::getWallKicks(RotationState previous) {
+    std::vector<sf::Vector2i> kicks;
+    auto& offsetTable = (baseShape != TetrisConstants::SHAPES[0])
+        ? TetrisConstants::WALL_KICKS_JLSTZ
+        : TetrisConstants::WALL_KICKS_I;
+
+    for (int i = 0; i < 5; i++) {
+        kicks.push_back({
+            offsetTable[previous][i].x - offsetTable[currentRotation][i].x,
+            offsetTable[previous][i].y - offsetTable[currentRotation][i].y
+        });
+    }
+    return kicks;
 }
 
 void Tetromino::zero() {

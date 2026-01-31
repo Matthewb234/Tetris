@@ -7,6 +7,7 @@
 
 #include "drop_timer.h"
 #include "piece_display.h"
+#include "score_manager.h"
 #include "tetromino.h"
 #include "../../components/game.h"
 
@@ -27,11 +28,13 @@ private:
 
     std::unique_ptr<PieceDisplay> storedPieceDisplay;
     std::unique_ptr<PieceDisplay> nextPieceDisplay;
+    std::unique_ptr<ScoreDisplay> scoreDisplay;
 
     DropTimer dropTimer;
 
     bool invalidSpawn = false;
     bool canStorePiece = true;
+    bool isSoftDropping = false;
 
     // Helper methods for rendering with GameBoard
     void drawGrid();
@@ -42,10 +45,11 @@ public:
     explicit Tetris();
     void initializeBoard();
     void spawnPiece();
-    void movePiece(int, int);
+    bool movePiece(int, int);
     void rotatePiece(bool);
     void lockPiece();
-    void pushDownPiece();
+    void softDrop();
+    void hardDrop();
     void storePiece();
     void clearLines();
     void handleEvent(sf::Event event) override;

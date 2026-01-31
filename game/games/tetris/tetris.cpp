@@ -6,8 +6,7 @@
 #include "../../application_context.h"
 #include "../../constants.h"
 
-Tetris::Tetris()
-: dropTimer(DropTimer(1)) {
+Tetris::Tetris() : dropTimer(DropTimer()) {
     grid.resize(TetrisConstants::GRID_HEIGHT_BlOCKS, std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
     initializeBoard();
 
@@ -38,9 +37,13 @@ void Tetris::initializeBoard() {
         gridSprite.getPosition().y - (gridTexture.getSize().y/2 + 3),
         sf::Vector2f(TetrisConstants::DISPLAY_WIDTH,0), "HOLD");
     nextPieceDisplay = std::make_unique<PieceDisplay>(
-    gridSprite.getPosition().x + (gridTexture.getSize().x/2),
-    gridSprite.getPosition().y - (gridTexture.getSize().y/2 + 3),
-    sf::Vector2f(0, 0), "NEXT");
+        gridSprite.getPosition().x + (gridTexture.getSize().x/2),
+        gridSprite.getPosition().y - (gridTexture.getSize().y/2 + 3),
+        sf::Vector2f(0, 0), "NEXT");
+    scoreDisplay = std::make_unique<ScoreDisplay>(
+        gridSprite.getPosition().x - (gridTexture.getSize().x/2 + 3),
+        gridSprite.getPosition().y + (gridTexture.getSize().y/2 + 3)
+    );
 }
 
 void Tetris::spawnPiece() {
@@ -57,22 +60,26 @@ void Tetris::spawnPiece() {
     }
     nextPieceDisplay->setTetromino(nextPiece.get());
     canStorePiece = true;
+    dropTimer.resetTimers(false);
 }
 
-void Tetris::movePiece(int dx, int dy) {
+bool Tetris::movePiece(int dx, int dy) {
     if (currentPiece->isValidMove(dx, dy, grid)) {
         currentPiece->coords.x += dx;
         currentPiece->coords.y += dy;
+        dropTimer.resetTimers(false);
+        return true;
     }
+    return false;
 }
 
 void Tetris::rotatePiece(bool rotateRight) {
-    auto oldShape = currentPiece->shape;
+    auto previousRotation = currentPiece->currentRotation;
     currentPiece->rotate(rotateRight);
-    if (!currentPiece->isValidMove(0, 0, grid)) {
-        currentPiece->shape = oldShape;
-        currentPiece->createSprite();
+    for (const auto& offset : currentPiece->getWallKicks(previousRotation)) {
+        if (movePiece(offset.x, offset.y)) return;
     }
+    currentPiece->rotate(!rotateRight);
 }
 
 void Tetris::lockPiece() {
@@ -91,7 +98,7 @@ void Tetris::lockPiece() {
                 if (gridY >= 0 && gridY < TetrisConstants::GRID_HEIGHT_BlOCKS &&
                     gridX >= 0 && gridX < TetrisConstants::GRID_WIDTH_BLOCKS) {
                     grid[gridY][gridX] = currentPiece->color;
-                    }
+                }
             }
         }
     }
@@ -112,13 +119,24 @@ void Tetris::storePiece() {
     canStorePiece = false;
 }
 
-void Tetris::pushDownPiece() {
+void Tetris::hardDrop() {
     if (currentPiece->coords.ghostY < currentPiece->coords.y) return;
+    int delta = currentPiece->coords.ghostY - currentPiece->coords.y;
     currentPiece->coords.y = currentPiece->coords.ghostY;
     lockPiece();
+    scoreDisplay->getScoreManager().addDropScore(delta, true);
+}
+
+void Tetris::softDrop() {
+    isSoftDropping = true;
+    if (currentPiece->isValidMove(0, 1, grid)) {
+        currentPiece->coords.y++;
+        scoreDisplay->getScoreManager().addDropScore(1, false);
+    }
 }
 
 void Tetris::clearLines() {
+    int linesCleared = 0;
     for (int i = TetrisConstants::GRID_HEIGHT_BlOCKS - 1; i >= 0; i--) {
         bool fullLine = true;
         for (int j = 0; j < TetrisConstants::GRID_WIDTH_BLOCKS; j++) {
@@ -130,9 +148,13 @@ void Tetris::clearLines() {
         if (fullLine) {
             grid.erase(grid.begin() + i);
             grid.insert(grid.begin(), std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
-            i++; // Check the same line again
+            linesCleared++;
+            i++;
         }
     }
+    if (linesCleared == 0) return;
+    scoreDisplay->getScoreManager().incrementLines(linesCleared);
+    dropTimer.updateDropInterval(scoreDisplay->getScoreManager().getLevel());
 }
 
 void Tetris::drawGrid() {
@@ -174,40 +196,24 @@ void Tetris::drawCurrentPiece() {
     gridTexture.draw(currentPiece->pieceSprite);
 }
 
-void Tetris::handleEvent(sf::Event event) {
-    auto& input = ApplicationContext::get().getInputManager();
-
-    if (input.isPressed("Move Left", event.key.code)) {
-        movePiece(-1, 0);
-    } else if (input.isPressed("Move Right", event.key.code)) {
-        movePiece(1, 0);
-    } else if (input.isPressed("Move Down", event.key.code)) {
-        movePiece(0, 1);
-    } else if (input.isPressed("Rotate CW", event.key.code)) {
-        rotatePiece(true);
-    } else if (input.isPressed("Rotate CCW", event.key.code)) {
-        rotatePiece(false);
-    } else if (input.isPressed("Store", event.key.code)) {
-        storePiece();
-    } else if (input.isPressed("Push Down", event.key.code)) {
-        pushDownPiece();
-    }
-}
-
 void Tetris::drawGameContent() {
     drawGrid();
     board->drawToBoard(storedPieceDisplay->getSprite());
     board->drawToBoard(nextPieceDisplay->getSprite());
+    board->drawToBoard(scoreDisplay->getSprite());
 }
 
 bool Tetris::update() {
     if (invalidSpawn) return false;
     currentPiece->calcGhostPosition(grid);
+    scoreDisplay->updateDisplay();
 
-    if (dropTimer.shouldDrop()) {
-        if (currentPiece->isValidMove(0, 1, grid)) {
+    if (currentPiece->isValidMove(0, 1, grid)) {
+        if (dropTimer.shouldDrop()) {
             currentPiece->coords.y++;
-        } else {
+        }
+    } else {
+        if (dropTimer.shouldLock()) {
             lockPiece();
         }
     }
@@ -219,3 +225,29 @@ void Tetris::activateInputContext() {
     auto& input = ApplicationContext::get().getInputManager();
     input.setActiveContext("tetris");
 };
+
+void Tetris::handleEvent(sf::Event event) {
+    auto& input = ApplicationContext::get().getInputManager();
+    if (event.type == sf::Event::KeyReleased) {
+        if (input.isPressed("Move Down", event.key.code)) {
+            isSoftDropping = false;
+        } else {
+            return;
+        }
+    }
+    if (input.isPressed("Move Left", event.key.code)) {
+        movePiece(-1, 0);
+    } else if (input.isPressed("Move Right", event.key.code)) {
+        movePiece(1, 0);
+    } else if (input.isPressed("Move Down", event.key.code)) {
+        softDrop();
+    } else if (input.isPressed("Rotate CW", event.key.code)) {
+        rotatePiece(true);
+    } else if (input.isPressed("Rotate CCW", event.key.code)) {
+        rotatePiece(false);
+    } else if (input.isPressed("Store", event.key.code)) {
+        storePiece();
+    } else if (input.isPressed("Push Down", event.key.code)) {
+        hardDrop();
+    }
+}

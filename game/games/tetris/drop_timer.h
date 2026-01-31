@@ -1,22 +1,48 @@
 #ifndef TETRIS_DROP_TIMER_H
 #define TETRIS_DROP_TIMER_H
 #include <chrono>
+#include <iostream>
+#include <ostream>
 
 class DropTimer {
 private:
     std::chrono::steady_clock::time_point lastDrop;
-    int dropInterval; // milliseconds
+    double dropInterval;
+
+    std::chrono::steady_clock::time_point lockDelayStart{};
+    int lockResets = 0;
 
 public:
-    DropTimer(int fallSpeed): dropInterval(1000/fallSpeed) {
-        reset();
+    DropTimer() {
+        updateDropInterval(1);
+        resetTimers();
     }
 
-    void reset() {
-        lastDrop = std::chrono::steady_clock::now();
+    void resetTimers(bool resetDrop = true) {
+        if (resetDrop) lastDrop = std::chrono::steady_clock::now();
+        else if (lockResets <= 15 && lockDelayStart != std::chrono::steady_clock::time_point()) {
+            lockDelayStart = std::chrono::steady_clock::time_point();
+            lockResets++;
+        }
     }
 
-    // Check if it's time to drop
+    bool shouldLock() {
+        if (lockDelayStart == std::chrono::steady_clock::time_point()) {
+            lockDelayStart = std::chrono::steady_clock::now();
+        }
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            now - lockDelayStart
+        ).count();
+
+        if (elapsed >= 500) {
+            lockDelayStart = std::chrono::steady_clock::time_point();
+            lockResets = 0;
+            return true;
+        }
+        return false;
+    }
+
     bool shouldDrop() {
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -24,19 +50,14 @@ public:
         ).count();
 
         if (elapsed >= dropInterval) {
-            lastDrop = now; // Reset for next drop
+            lastDrop = now;
             return true;
         }
         return false;
     }
 
-    // Speed up as levels increase
-    void setDropInterval(int milliseconds) {
-        dropInterval = milliseconds;
-    }
-
-    int getDropInterval() const {
-        return dropInterval;
+    void updateDropInterval(int level) {
+        dropInterval = 1000 * pow(0.8 - ((level - 1) * 0.007), level - 1);
     }
 };
 

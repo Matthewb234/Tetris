@@ -39,8 +39,8 @@ public:
         label.setFont(font);
         label.setString(labelText);
         label.setCharacterSize(16);
-        label.setFillColor(sf::Color::Black);
-        label.setPosition(10, displayTexture.getSize().y * .04);  // Top-left when flipped
+        label.setFillColor(sf::Color::White);
+        label.setPosition(10, displayTexture.getSize().y * .05);  // Top-left when flipped
 
         setTetromino(nullptr);
     }
@@ -54,7 +54,9 @@ public:
         sf::RectangleShape topSection(sf::Vector2f(
             displayTexture.getSize().x,
             quarterHeight));
-        topSection.setFillColor(sf::Color::White);
+        topSection.setFillColor(sf::Color(100, 100, 100));
+        topSection.setOutlineThickness(1);
+        topSection.setOutlineColor(sf::Color::White);
         displayTexture.draw(topSection);
 
         // Draw label

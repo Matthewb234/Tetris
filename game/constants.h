@@ -42,6 +42,20 @@ namespace TetrisConstants {
         sf::Color::Blue,
         sf::Color(255, 165, 0)  // Orange
     };
+
+    const std::vector<std::vector<sf::Vector2i>> WALL_KICKS_JLSTZ = {
+        {{0,0}, {0,0}, {0,0}, {0,0}, {0,0}}, // N
+        {{0,0}, {1,0}, {1,-1}, {0,2}, {1,2}}, // E
+        {{0,0}, {0,0}, {0,0}, {0,0}, {0,0}}, // S
+        {{0,0}, {-1,0}, {-1,-1}, {0,2}, {-1,2}}, // W
+    };
+
+    const std::vector<std::vector<sf::Vector2i>> WALL_KICKS_I = {
+        {{0,0}, {-1,0}, {2,0}, {-1,0}, {2,0}}, // N
+        {{0,0}, {1,0}, {1,0}, {1,1}, {1,-2}}, // E
+        {{0,0}, {2,0}, {-1,0}, {2,-1}, {-1,-1}}, // S
+        {{0,0}, {0,0}, {0,0}, {0,-2}, {0,1}} // W
+    };
 };
 
 #endif //TETRIS_CONSTANTS_H

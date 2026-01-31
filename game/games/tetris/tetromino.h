@@ -10,7 +10,6 @@
 struct Coords {
     int x, y, ghostY;
 
-
     Coords() : x(0), y(0) {}
     Coords(int x, int y) : x(x), y(y) {}
     float boardX() {return x * TetrisConstants::BLOCK_SIZE;}
@@ -18,6 +17,13 @@ struct Coords {
         if (isGhost) return ghostY * TetrisConstants::BLOCK_SIZE;
         return y * TetrisConstants::BLOCK_SIZE;
     }
+};
+
+enum RotationState {
+    N,
+    E,
+    S,
+    W
 };
 
 class Tetromino {
@@ -29,8 +35,11 @@ private:
 public:
     std::vector<std::vector<int>> baseShape;
     std::vector<std::vector<int>> shape;
+    RotationState currentRotation = N;
+
     sf::Sprite pieceSprite;
     sf::Sprite ghostSprite;
+
     sf::Color color;
     Coords coords;
 
@@ -39,6 +48,7 @@ public:
     void createSprite();
     sf::Vector2f position(bool);
     void rotate(bool);
+    std::vector<sf::Vector2i> getWallKicks(RotationState);
     void zero();
     void calcGhostPosition(const std::vector<std::vector<sf::Color>>&);
     bool isValidMove(int, int, std::vector<std::vector<sf::Color>>);
