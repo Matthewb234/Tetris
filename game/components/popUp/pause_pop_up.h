@@ -12,14 +12,10 @@
 class PausePopUp : public GamePopUp {
 public:
     PausePopUp() {
-        title.setFont(font);
+        title.setFont(Constants::FONT);
         title.setString("PAUSED");
         title.setCharacterSize(36);
         title.setFillColor(sf::Color::White);
-        sf::FloatRect titleBounds = title.getLocalBounds();
-        title.setPosition(
-            Constants::GAME_POP_UP_DISPLAY_WIDTH / 2 - titleBounds.width / 2,
-            Constants::GAME_POP_UP_DISPLAY_HEIGHT * .075 - titleBounds.height / 2);
 
         std::vector<std::string> labels = {"Resume", "Restart", "Quit"};
         for (int i = 0; i < labels.size(); i++) {
@@ -29,13 +25,21 @@ public:
                 Constants::GAME_POP_UP_DISPLAY_WIDTH * .8,
                 (Constants::GAME_POP_UP_DISPLAY_HEIGHT - 50) / 5,
                 labels[i],
-                font,
+                Constants::FONT,
                 40
             ));
         }
     }
 
-    void drawExtraContent() override {}
+    void drawExtraContent() override {
+        if (!initialized) {
+            sf::FloatRect titleBounds = title.getLocalBounds();
+            title.setPosition(
+                Constants::GAME_POP_UP_DISPLAY_WIDTH / 2 - titleBounds.width / 2,
+                Constants::GAME_POP_UP_DISPLAY_HEIGHT * .075 - titleBounds.height / 2);
+            initialized = true;
+        }
+    }
 
     GameAction handleClick(sf::Vector2i mousePos) override {
         sf::Transform inverse = displaySprite.getInverseTransform();

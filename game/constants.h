@@ -3,22 +3,50 @@
 #include <vector>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics.hpp>
+#include <filesystem>
+
 
 namespace Constants {
     constexpr int WINDOW_WIDTH = 800;
     constexpr int WINDOW_HEIGHT = 800;
     constexpr int GAME_POP_UP_DISPLAY_WIDTH = 250;
     constexpr int GAME_POP_UP_DISPLAY_HEIGHT = 350;
+    inline sf::Font FONT;
+
+    inline std::filesystem::path& _exeDir() {
+        static std::filesystem::path dir;
+        return dir;
+    }
+
+    inline void initPaths(int argc, char* argv[]) {
+        auto exePath = std::filesystem::path(argv[0]).parent_path();
+        if (std::filesystem::exists(exePath / "assets")) {
+            _exeDir() = exePath;
+        }
+        else {
+            _exeDir() = exePath.parent_path();
+        }
+    }
+
+    inline std::string getAssetPath(const std::string& relativePath) {
+        return (_exeDir() / relativePath).string();
+    }
+
+    inline void loadFont() {
+        if (!FONT.loadFromFile(getAssetPath("assets\\fonts\\arial.ttf"))) {
+            // Handle font loading error
+        }
+    }
 };
 
 namespace TetrisConstants {
     constexpr int BLOCK_SIZE = 30;
     constexpr int GRID_WIDTH_BLOCKS = 10;
-    constexpr int GRID_HEIGHT_BlOCKS = 20;
+    constexpr int GRID_HEIGHT_BLOCKS = 20;
     constexpr int DISPLAY_WIDTH_BLOCKS = 5;
     constexpr int DISPLAY_HEIGHT_BLOCKS = 4;
     constexpr int GRID_WIDTH = GRID_WIDTH_BLOCKS * BLOCK_SIZE;
-    constexpr int GRID_HEIGHT = GRID_HEIGHT_BlOCKS * BLOCK_SIZE;
+    constexpr int GRID_HEIGHT = GRID_HEIGHT_BLOCKS * BLOCK_SIZE;
     constexpr int DISPLAY_WIDTH = DISPLAY_WIDTH_BLOCKS * BLOCK_SIZE;
     constexpr int DISPLAY_HEIGHT = DISPLAY_HEIGHT_BLOCKS * BLOCK_SIZE;
 

@@ -20,7 +20,7 @@ public:
 
     void resetTimers(bool resetDrop = true) {
         if (resetDrop) lastDrop = std::chrono::steady_clock::now();
-        else if (lockResets <= 15 && lockDelayStart != std::chrono::steady_clock::time_point()) {
+        else if (lockResets <= 15) {
             lockDelayStart = std::chrono::steady_clock::time_point();
             lockResets++;
         }

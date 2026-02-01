@@ -3,20 +3,17 @@
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Font.hpp>
 
 #include "../../constants.h"
 #include "tetromino.h"
 #include "iostream"
 
 class PieceDisplay {
-private:
     sf::Sprite pieceSprite;
 
     sf::RenderTexture displayTexture;
     sf::Sprite displaySprite;
 
-    sf::Font font;
     sf::Text label;
     sf::Vector2f position;
 
@@ -32,11 +29,7 @@ public:
         displaySprite.setOrigin(origin.x, origin.y);
         displaySprite.setPosition(position);
 
-        if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
-            // Handle font loading error
-        }
-
-        label.setFont(font);
+        label.setFont(Constants::FONT);
         label.setString(labelText);
         label.setCharacterSize(16);
         label.setFillColor(sf::Color::White);

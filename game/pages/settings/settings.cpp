@@ -7,11 +7,7 @@
 #include "../../application_context.h"
 
 Settings::Settings() {
-    if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
-        // Handle font loading error
-    }
-
-    title.setFont(font);
+    title.setFont(Constants::FONT);
     title.setString("SETTINGS");
     title.setCharacterSize(70);
     title.setFillColor(sf::Color::White);
@@ -21,21 +17,21 @@ Settings::Settings() {
     overlay.setSize(sf::Vector2f(Constants::WINDOW_WIDTH, Constants::WINDOW_HEIGHT));
     overlay.setFillColor(sf::Color(0, 0, 0, 180));
 
-    rebindPromptOne.setFont(font);
+    rebindPromptOne.setFont(Constants::FONT);
     rebindPromptOne.setCharacterSize(40);
     rebindPromptOne.setFillColor(sf::Color::White);
-    rebindPromptTwo.setFont(font);
+    rebindPromptTwo.setFont(Constants::FONT);
     rebindPromptTwo.setCharacterSize(40);
     rebindPromptTwo.setFillColor(sf::Color::White);
 
     auto backBtn = std::make_unique<TransparentButton>(
         Constants::WINDOW_WIDTH * .05,
         Constants::WINDOW_HEIGHT * .025,
-        font,
+        Constants::FONT,
         "BACK",
         35
     );
-    buttons[""] = std::move(backBtn);
+    buttons["__back__"] = std::move(backBtn);
 
     auto& input = ApplicationContext::get().getInputManager();
     auto& bindings = input.getActiveBindings();
@@ -48,7 +44,7 @@ Settings::Settings() {
             Constants::WINDOW_WIDTH / 3,
             Constants::WINDOW_HEIGHT / 15,
             action + ": " + input.getKeyDisplayString(input.getActiveContext(), action),
-            font
+            Constants::FONT
         );
         buttons[action] = std::move(button);
         i++;
@@ -119,8 +115,7 @@ void Settings::handleClick(sf::Vector2i mousePos) {
 
     for (auto& [action, button] : buttons) {
         if (button->isClicked(mousePos)) {
-            if (action.empty()) {
-                std::cout << "Back Button Hit" << std::endl;
+            if (action == "__back__") {
                 appCtx.getPageManager().switchState(PageState::MAIN_MENU);
             } else {
                 // Rebind button

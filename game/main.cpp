@@ -6,15 +6,17 @@
 #include "managers/game_state_manager.h"
 #include "managers/page_state_manager.h"
 #include "games/tetris/tetris.h"
+
 ApplicationContext appCtx;
 
 bool lostFocus = false;
 
 // METHODS:
-void drawFrame(const sf::Sprite&);
 void manageEvent();
 
-int main() {
+int main(int argc, char* argv[]) {
+    Constants::initPaths(argc, argv);
+    Constants::loadFont();
     auto& window = appCtx.getWindow();
     auto& gameManager = appCtx.getGameManager();
     auto& pageManager = appCtx.getPageManager();
@@ -51,8 +53,6 @@ int main() {
         windowSprite.setPosition(Constants::WINDOW_WIDTH/2.f, Constants::WINDOW_HEIGHT/2.f);
         window.draw(windowSprite);
 
-        if (gameManager.paused() && pageManager.inGame()) {
-        }
         window.display();
     }
 

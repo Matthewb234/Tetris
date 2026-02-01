@@ -25,7 +25,6 @@ private:
     
     std::random_device rd;
     std::mt19937 generator = std::mt19937(rd());
-    std::uniform_int_distribution<> numGen = std::uniform_int_distribution<>(0, 6);
     std::vector<int> pieceBag = {0, 1, 2, 3, 4, 5, 6};
     std::unique_ptr<Tetromino> currentPiece;
     std::unique_ptr<Tetromino> storedPiece;

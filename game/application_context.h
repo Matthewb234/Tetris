@@ -6,14 +6,12 @@
 #define TETRIS_APPLICATIONCONTEXT_H
 
 #include <SFML/Graphics.hpp>
-#include <memory>
 
 #include "managers/game_state_manager.h"
 #include "managers/page_state_manager.h"
 #include "managers/input_manager.h"
 
 class ApplicationContext {
-private:
     inline static ApplicationContext* instance = nullptr;
 
     sf::RenderWindow window;

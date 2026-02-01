@@ -20,14 +20,11 @@ protected:
     sf::Sprite displaySprite;
     std::vector<std::unique_ptr<Button>> buttons;
     sf::Text title;
-    sf::Font font;
+
+    bool initialized = false;
 
     GamePopUp() {
         displayTexture.create(Constants::GAME_POP_UP_DISPLAY_WIDTH, Constants::GAME_POP_UP_DISPLAY_HEIGHT);
-
-        if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
-            // Handle font loading error
-        }
     }
 
 public:

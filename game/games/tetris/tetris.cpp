@@ -7,7 +7,7 @@
 #include "../../constants.h"
 
 Tetris::Tetris() : dropTimer(DropTimer()) {
-    grid.resize(TetrisConstants::GRID_HEIGHT_BlOCKS, std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
+    grid.resize(TetrisConstants::GRID_HEIGHT_BLOCKS, std::vector<sf::Color>(TetrisConstants::GRID_WIDTH_BLOCKS, sf::Color::Black));
     initializeBoard();
 
     std::shuffle(pieceBag.begin(), pieceBag.end(), generator);
@@ -26,7 +26,7 @@ void Tetris::initializeBoard() {
 
     gridTexture.create(
         TetrisConstants::GRID_WIDTH_BLOCKS * TetrisConstants::BLOCK_SIZE,
-        TetrisConstants::GRID_HEIGHT_BlOCKS * TetrisConstants::BLOCK_SIZE
+        TetrisConstants::GRID_HEIGHT_BLOCKS * TetrisConstants::BLOCK_SIZE
     );
     gridSprite.setTexture(gridTexture.getTexture());
     gridSprite.setOrigin(TetrisConstants::GRID_WIDTH/2.f, TetrisConstants::GRID_HEIGHT/2.f);
@@ -86,12 +86,12 @@ void Tetris::rotatePiece(bool rotateRight) {
 }
 
 void Tetris::checkTSpin() {
-    if (currentPiece->baseShape == TetrisConstants::SHAPES[2]) return;
+    if (currentPiece->baseShape != TetrisConstants::SHAPES[2]) return;
     int x = currentPiece->coords.x;
     int y = currentPiece->coords.y;
     auto isBlocked = [&](int checkX, int checkY) {
         if (checkX < 0 || checkX >= TetrisConstants::GRID_WIDTH_BLOCKS ||
-            checkY < 0 || checkY >= TetrisConstants::GRID_HEIGHT_BlOCKS) {
+            checkY < 0 || checkY >= TetrisConstants::GRID_HEIGHT_BLOCKS) {
             return true;  // Out of bounds counts as filled
             }
         return grid[checkY][checkX] != sf::Color::Black;
@@ -134,7 +134,7 @@ void Tetris::lockPiece() {
                 int gridX = topLeftX + j;
                 int gridY = topLeftY + i;
 
-                if (gridY >= 0 && gridY < TetrisConstants::GRID_HEIGHT_BlOCKS &&
+                if (gridY >= 0 && gridY < TetrisConstants::GRID_HEIGHT_BLOCKS &&
                     gridX >= 0 && gridX < TetrisConstants::GRID_WIDTH_BLOCKS) {
                     grid[gridY][gridX] = currentPiece->color;
                 }
@@ -177,7 +177,7 @@ void Tetris::softDrop() {
 
 void Tetris::clearLines() {
     int linesCleared = 0;
-    for (int i = TetrisConstants::GRID_HEIGHT_BlOCKS - 1; i >= 0; i--) {
+    for (int i = TetrisConstants::GRID_HEIGHT_BLOCKS - 1; i >= 0; i--) {
         bool fullLine = true;
         for (int j = 0; j < TetrisConstants::GRID_WIDTH_BLOCKS; j++) {
             if (grid[i][j] == sf::Color::Black) {
@@ -203,7 +203,7 @@ void Tetris::clearLines() {
 void Tetris::drawGrid() {
     gridTexture.clear(sf::Color::Transparent);
 
-    for (int i = 0; i < TetrisConstants::GRID_HEIGHT_BlOCKS; i++) {
+    for (int i = 0; i < TetrisConstants::GRID_HEIGHT_BLOCKS; i++) {
         for (int j = 0; j < TetrisConstants::GRID_WIDTH_BLOCKS; j++) {
             sf::RectangleShape block(sf::Vector2f(
                 TetrisConstants::BLOCK_SIZE - 1,

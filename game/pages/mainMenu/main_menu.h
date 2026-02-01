@@ -14,7 +14,9 @@ class MainMenu : public MenuPage {
 private:
     std::vector<std::unique_ptr<Button>> buttons;
     sf::Text title;
-    sf::Font font;
+
+    bool initialized = false;
+
     void drawMenuContent() override;
 public:
     MainMenu();

@@ -10,8 +10,8 @@
 struct Coords {
     int x, y, ghostY;
 
-    Coords() : x(0), y(0) {}
-    Coords(int x, int y) : x(x), y(y) {}
+    Coords() : x(0), y(0), ghostY(0) {}
+    Coords(int x, int y) : x(x), y(y), ghostY(0) {}
     float boardX() {return x * TetrisConstants::BLOCK_SIZE;}
     float boardY(bool isGhost) {
         if (isGhost) return ghostY * TetrisConstants::BLOCK_SIZE;
@@ -51,6 +51,6 @@ public:
     std::vector<sf::Vector2i> getWallKicks(RotationState);
     void zero();
     void calcGhostPosition(const std::vector<std::vector<sf::Color>>&);
-    bool isValidMove(int, int, std::vector<std::vector<sf::Color>>);
+    bool isValidMove(int, int, const std::vector<std::vector<sf::Color>>&);
 };
 #endif // TETROMINO_H

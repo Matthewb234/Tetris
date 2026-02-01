@@ -30,6 +30,8 @@ public:
         score += cells * (isHardDrop ? 2 : 1);
     }
     void addTSpinScore(bool isMini, int linesCleared) {
+        lines += linesCleared;
+        level = level == 15 ? 15 : 1 + (lines / 10);
         if (isMini) {
             switch (linesCleared) {
                 case 0:
@@ -98,7 +100,6 @@ class ScoreDisplay {
     sf::RenderTexture staticTexture;
     sf::Sprite displaySprite;
 
-    sf::Font font;
     std::vector<sf::Text> scoreTexts;
     std::vector<sf::Text> labels;
 
@@ -108,15 +109,11 @@ public:
         displayTexture.create(TetrisConstants::DISPLAY_WIDTH * .8, TetrisConstants::GRID_HEIGHT * .35);
         staticTexture.create(TetrisConstants::DISPLAY_WIDTH * .8, TetrisConstants::GRID_HEIGHT * .35);
 
-        if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
-            // Handle font loading error
-        }
-
         drawStaticElements();
 
         for (int i = 0; i < 3; i++) {
             sf::Text text;
-            text.setFont(font);
+            text.setFont(Constants::FONT);
             text.setCharacterSize(30);
             text.setFillColor(sf::Color::White);
             scoreTexts.push_back(text);
@@ -147,7 +144,7 @@ public:
             staticTexture.draw(labelBox);
 
             sf::Text label;
-            label.setFont(font);
+            label.setFont(Constants::FONT);
             label.setString(labels[i]);
             label.setCharacterSize(20);
             label.setFillColor(sf::Color::White);

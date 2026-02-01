@@ -3,22 +3,17 @@
 //
 
 #include "main_menu.h"
-#include "../../application_context.h"
 
 #include <iostream>
 
+#include "../../application_context.h"
+
 
 MainMenu::MainMenu() {
-    if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
-        // Handle font loading error
-    }
-
-    title.setFont(font);
+    title.setFont(Constants::FONT);
     title.setString("TETRIS");
     title.setCharacterSize(80);
     title.setFillColor(sf::Color::White);
-    sf::FloatRect titleBounds = title.getLocalBounds();
-    title.setPosition(Constants::WINDOW_WIDTH / 2 - titleBounds.width / 2, Constants::WINDOW_HEIGHT * .3 - titleBounds.height / 2);
 
     std::vector<std::string> labels = {"Play", "Settings", "Quit"};
 
@@ -29,7 +24,7 @@ MainMenu::MainMenu() {
             Constants::WINDOW_WIDTH / 3,
             Constants::WINDOW_HEIGHT / 10,
             labels[i],
-            font,
+            Constants::FONT,
             40
         ));
     }
@@ -37,6 +32,12 @@ MainMenu::MainMenu() {
 
 void MainMenu::drawMenuContent() {
     renderTexture.clear(sf::Color(20, 20, 30, 230));
+
+    if (!initialized) {
+        sf::FloatRect titleBounds = title.getLocalBounds();
+        title.setPosition(Constants::WINDOW_WIDTH / 2 - titleBounds.width / 2, Constants::WINDOW_HEIGHT * .3 - titleBounds.height / 2);
+        initialized = true;
+    }
 
     renderTexture.draw(title);
     for (int i = 0; i < buttons.size(); i++) {

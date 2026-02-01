@@ -4,21 +4,22 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-#include "rounded_rectangle.h"
-
 class Button {
 protected:  // Changed from private so derived classes can access
     sf::RectangleShape shape;
     sf::Text text;
     sf::Font& font;
+
     bool isHovered;
+    bool initialized = false;
 
 public:
     Button(float x, float y, float width, float height, const std::string& label, sf::Font& font, int fontSize = 24)
         : font(font), isHovered(false) {
 
         shape.setSize(sf::Vector2f(width, height));
-        shape.setPosition(x - (width/2), y - (height/2));
+        shape.setOrigin(width / 2, height / 2);
+        shape.setPosition(x, y);
         shape.setFillColor(sf::Color(70, 70, 70));
         shape.setOutlineThickness(2);
         shape.setOutlineColor(sf::Color::White);
@@ -27,13 +28,6 @@ public:
         text.setString(label);
         text.setCharacterSize(fontSize);
         text.setFillColor(sf::Color::White);
-
-        // Center text in button
-        sf::FloatRect textBounds = text.getLocalBounds();
-        text.setPosition(
-            x - (textBounds.width/2),
-            y  - (textBounds.height/2) - 10
-        );
     }
 
     virtual ~Button() = default;  // Virtual destructor for inheritance
@@ -41,12 +35,7 @@ public:
     void setText(const std::string& newText) {
         text.setString(newText);
 
-        sf::FloatRect textBounds = text.getLocalBounds();
-        sf::Vector2f center = shape.getPosition() + shape.getSize() / 2.f;
-        text.setPosition(
-            center.x - (textBounds.width/2),
-            center.y - (textBounds.height/2) - 5
-        );
+        text.setPosition(shape.getPosition());
     }
 
     virtual void update(sf::Vector2i mousePos) {
@@ -58,6 +47,13 @@ public:
     }
 
     virtual void draw(sf::RenderTexture& texture) {
+        if (!initialized) {
+            sf::FloatRect textBounds = text.getLocalBounds();
+            text.setOrigin(textBounds.width/2, textBounds.height - 5);
+            text.setPosition(shape.getPosition());
+            initialized = true;
+        }
+
         if (isHovered) {
             shape.setFillColor(sf::Color(100, 100, 100));
         } else {

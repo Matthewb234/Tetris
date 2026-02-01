@@ -10,16 +10,12 @@ class GameOverPopUp : public GamePopUp {
     sf::Text scoreText;
     public:
     GameOverPopUp() {
-        title.setFont(font);
+        title.setFont(Constants::FONT);
         title.setString("GAME OVER");
         title.setCharacterSize(36);
         title.setFillColor(sf::Color::White);
-        sf::FloatRect titleBounds = title.getLocalBounds();
-        title.setPosition(
-            Constants::GAME_POP_UP_DISPLAY_WIDTH / 2 - titleBounds.width / 2,
-            Constants::GAME_POP_UP_DISPLAY_HEIGHT * .15 - titleBounds.height / 2);
 
-        scoreText.setFont(font);
+        scoreText.setFont(Constants::FONT);
         scoreText.setCharacterSize(30);
         scoreText.setFillColor(sf::Color::White);
 
@@ -31,7 +27,7 @@ class GameOverPopUp : public GamePopUp {
                 Constants::GAME_POP_UP_DISPLAY_WIDTH * .8,
                 (Constants::GAME_POP_UP_DISPLAY_HEIGHT - 50) / 5,
                 labels[i],
-                font,
+                Constants::FONT,
                 40
             ));
         }
@@ -46,6 +42,14 @@ class GameOverPopUp : public GamePopUp {
     }
 
     void drawExtraContent() override {
+        if (!initialized) {
+            sf::FloatRect titleBounds = title.getLocalBounds();
+            title.setPosition(
+                Constants::GAME_POP_UP_DISPLAY_WIDTH / 2 - titleBounds.width / 2,
+                Constants::GAME_POP_UP_DISPLAY_HEIGHT * .15 - titleBounds.height / 2);
+            initialized = true;
+        }
+
         displayTexture.draw(scoreText);
     }
 

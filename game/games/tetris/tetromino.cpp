@@ -104,7 +104,7 @@ void Tetromino::calcGhostPosition(const std::vector<std::vector<sf::Color>>& gri
     }
 }
 
-bool Tetromino::isValidMove(int dx, int dy, std::vector<std::vector<sf::Color>> grid) {
+bool Tetromino::isValidMove(int dx, int dy, const std::vector<std::vector<sf::Color>>& grid) {
     int rows = shape.size();
     int cols = shape[0].size();
 
@@ -116,7 +116,7 @@ bool Tetromino::isValidMove(int dx, int dy, std::vector<std::vector<sf::Color>> 
                 int gridX = newX + (j - (cols/2));
                 int gridY = newY + (i - (rows/2));
 
-                if (gridX < 0 || gridX >= TetrisConstants::GRID_WIDTH_BLOCKS || gridY >= TetrisConstants::GRID_HEIGHT_BlOCKS)
+                if (gridX < 0 || gridX >= TetrisConstants::GRID_WIDTH_BLOCKS || gridY >= TetrisConstants::GRID_HEIGHT_BLOCKS)
                     return false;
                 if (gridY >= 0 && grid[gridY][gridX] != sf::Color::Black)
                     return false;

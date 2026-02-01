@@ -13,7 +13,6 @@
 class Settings : public MenuPage {
     std::map<std::string, std::unique_ptr<Button>> buttons;
     sf::Text title;
-    sf::Font font;
 
     std::optional<std::string> waitingForRebind;  // Which action is waiting for a key
     sf::Text rebindPromptOne;
