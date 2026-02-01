@@ -12,8 +12,8 @@ protected:
     virtual void drawGameContent() = 0;
 public:
     virtual ~Game() = default;
-
     virtual void handleEvent(sf::Event event) = 0;
+    virtual int getScore() = 0;
     virtual bool update() = 0;
     virtual void activateInputContext() = 0;
     virtual sf::Vector2f textureSize() {return board->getSize();}

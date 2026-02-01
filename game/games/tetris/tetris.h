@@ -11,6 +11,12 @@
 #include "tetromino.h"
 #include "../../components/game.h"
 
+enum class TSpinType {
+    NONE,
+    MINI,
+    FULL
+};
+
 class Tetris : public Game {
 private:
     std::vector<std::vector<sf::Color>> grid;
@@ -20,7 +26,6 @@ private:
     std::random_device rd;
     std::mt19937 generator = std::mt19937(rd());
     std::uniform_int_distribution<> numGen = std::uniform_int_distribution<>(0, 6);
-
     std::vector<int> pieceBag = {0, 1, 2, 3, 4, 5, 6};
     std::unique_ptr<Tetromino> currentPiece;
     std::unique_ptr<Tetromino> storedPiece;
@@ -31,6 +36,8 @@ private:
     std::unique_ptr<ScoreDisplay> scoreDisplay;
 
     DropTimer dropTimer;
+
+    TSpinType currentTSpinType = TSpinType::NONE;
 
     bool invalidSpawn = false;
     bool canStorePiece = true;
@@ -52,6 +59,8 @@ public:
     void hardDrop();
     void storePiece();
     void clearLines();
+    void checkTSpin();
+    int getScore() override;
     void handleEvent(sf::Event event) override;
     bool update() override;
     void activateInputContext() override;

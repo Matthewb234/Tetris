@@ -55,7 +55,7 @@ void Tetris::spawnPiece() {
     pieceBag.pop_back();
     currentPiece = std::move(nextPiece);
     nextPiece = std::make_unique<Tetromino>(num);
-    if (!currentPiece->isValidMove(0, 0, grid)) {
+    if (!currentPiece->isValidMove(0, 1, grid)) {
         invalidSpawn = true;
     }
     nextPieceDisplay->setTetromino(nextPiece.get());
@@ -77,10 +77,49 @@ void Tetris::rotatePiece(bool rotateRight) {
     auto previousRotation = currentPiece->currentRotation;
     currentPiece->rotate(rotateRight);
     for (const auto& offset : currentPiece->getWallKicks(previousRotation)) {
-        if (movePiece(offset.x, offset.y)) return;
+        if (movePiece(offset.x, offset.y)) {
+            checkTSpin();
+            return;
+        }
     }
     currentPiece->rotate(!rotateRight);
 }
+
+void Tetris::checkTSpin() {
+    if (currentPiece->baseShape == TetrisConstants::SHAPES[2]) return;
+    int x = currentPiece->coords.x;
+    int y = currentPiece->coords.y;
+    auto isBlocked = [&](int checkX, int checkY) {
+        if (checkX < 0 || checkX >= TetrisConstants::GRID_WIDTH_BLOCKS ||
+            checkY < 0 || checkY >= TetrisConstants::GRID_HEIGHT_BlOCKS) {
+            return true;  // Out of bounds counts as filled
+            }
+        return grid[checkY][checkX] != sf::Color::Black;
+    };
+
+    bool topLeft = isBlocked(x - 1, y - 1);
+    bool topRight = isBlocked(x + 1, y - 1);
+    bool bottomLeft = isBlocked(x - 1, y + 1);
+    bool bottomRight = isBlocked(x + 1, y + 1);
+
+    int filledCorners = topLeft + topRight + bottomLeft + bottomRight;
+    if (filledCorners < 3) return;
+
+    RotationState rotation = currentPiece->currentRotation;
+    bool isMini = false;
+
+    if (rotation == N && bottomLeft && bottomRight && !topLeft && !topRight) {
+        isMini = true;
+    } else if (rotation == E && topLeft && bottomLeft && !topRight && !bottomRight) {
+        isMini = true;
+    } else if (rotation == S && topLeft && topRight && !bottomLeft && !bottomRight) {
+        isMini = true;
+    } else if (rotation == W && topRight && bottomRight && !topLeft && !bottomLeft) {
+        isMini = true;
+    }
+    currentTSpinType = isMini ? TSpinType::MINI : TSpinType::FULL;
+}
+
 
 void Tetris::lockPiece() {
     int rows = currentPiece->shape.size();
@@ -103,6 +142,7 @@ void Tetris::lockPiece() {
         }
     }
     clearLines();
+    currentTSpinType = TSpinType::NONE;
     spawnPiece();
 }
 
@@ -152,8 +192,11 @@ void Tetris::clearLines() {
             i++;
         }
     }
-    if (linesCleared == 0) return;
-    scoreDisplay->getScoreManager().incrementLines(linesCleared);
+    if (currentTSpinType != TSpinType::NONE) {
+        scoreDisplay->getScoreManager().addTSpinScore(currentTSpinType == TSpinType::MINI, linesCleared);
+    } else if (linesCleared != 0) {
+        scoreDisplay->getScoreManager().incrementLines(linesCleared);
+    }
     dropTimer.updateDropInterval(scoreDisplay->getScoreManager().getLevel());
 }
 
@@ -201,6 +244,10 @@ void Tetris::drawGameContent() {
     board->drawToBoard(storedPieceDisplay->getSprite());
     board->drawToBoard(nextPieceDisplay->getSprite());
     board->drawToBoard(scoreDisplay->getSprite());
+}
+
+int Tetris::getScore() {
+    return scoreDisplay->getScoreManager().getScore();
 }
 
 bool Tetris::update() {

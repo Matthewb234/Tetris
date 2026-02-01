@@ -4,6 +4,7 @@
 
 #ifndef TETRIS_SCORE_MANAGER_H
 #define TETRIS_SCORE_MANAGER_H
+
 namespace BaseScores {
     constexpr int SINGLE_LINE = 100;
     constexpr int DOUBLE_LINE = 300;
@@ -28,8 +29,40 @@ public:
     void addDropScore(int cells, bool isHardDrop) {
         score += cells * (isHardDrop ? 2 : 1);
     }
-    void addLineScore(int lines) {
-        switch (lines) {
+    void addTSpinScore(bool isMini, int linesCleared) {
+        if (isMini) {
+            switch (linesCleared) {
+                case 0:
+                    incrementScore(BaseScores::MINI_T_SPIN);
+                    break;
+                case 1:
+                    incrementScore(BaseScores::MINI_T_SPIN_SINGLE);
+                    break;
+                case 2:
+                    incrementScore(BaseScores::MINI_T_SPIN_DOUBLE);
+                    break;
+            }
+            b2b = false;
+        } else {
+            switch (linesCleared) {
+                case 0:
+                    incrementScore(BaseScores::T_SPIN, b2b);
+                    break;
+                case 1:
+                    incrementScore(BaseScores::T_SPIN_SINGLE, b2b);
+                    break;
+                case 2:
+                    incrementScore(BaseScores::T_SPIN_DOUBLE, b2b);
+                    break;
+                case 3:
+                    incrementScore(BaseScores::T_SPIN_TRIPLE, b2b);
+                    break;
+            }
+            b2b = true;
+        }
+    }
+    void addLineScore(int linesCleared) {
+        switch (linesCleared) {
             case 1:
                 incrementScore(BaseScores::SINGLE_LINE);
                 break;
